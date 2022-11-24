@@ -34,7 +34,7 @@ const loggedUser= async (data) =>{
             let newUseLog= await log.findById({_id: data._id})
             return newUseLog;
             
-            return newlog;
+            //return newlog;
         }
     }catch(err){
         console.error(err)
@@ -52,6 +52,15 @@ const updateUserLogs= async (newExerciseLog,data)=>{
 let getExeciseLogCount= async (user_id)=>{
     let numberExerciseLogs= await log.findById({_id: user_id });
     return numberExerciseLogs.logs.length;
+}
+
+const normalOrRangeUserLogs= async (req, res, next) =>{
+    
+    if (req.query.hasOwnProperty('from') && req.query.hasOwnProperty('to') && req.query.hasOwnProperty('limit')){
+        return viewAlluserLogsPerDateRange(req,res,next)
+    }else{
+        return viewUserLogs(req,res,next)
+    }
 }
 
 
@@ -84,31 +93,24 @@ let isUserLogged=(data)=>{
 
 
 
-
-
-const getLogsPerDateRange= (startDate,endDate)=>{
-    let userLog=log.findById({_id: req.params.id });
-    let userLogRange= userLog.logs.filter((x)=>{
-        let currentDate= new Date(x.date);
-        if (currentDate>startDate && currentDate<endDate){
-            return x
-        }
-
-    })
-    return userLogRange;
-}
-
-
-
 const viewAlluserLogsPerDateRange= async (req, res, next)=>{
     try{
         let userId= req.params.id;
-        let startDate= req.params.from;
-        let endDate= req.params.to;
-        let limit= req.params.limit;
+        let startDate= req.query.from;
+        let endDate= req.query.to;
+        let limit= req.query.limit;
+        let userLoger= await log.findById({_id: userId });
+        let userExerciseLogs=await getLogsPerDateRange(userId,new Date(startDate)[Symbol.toPrimitive]('number'),new Date(endDate)[Symbol.toPrimitive]('number'), limit)
+        let  newResultingUserExerciseLog={
+            username:userLoger.username,
+            count:userLoger.count,
+            _id:userId,
+            logs:userExerciseLogs.slice(0,limit)
+        }
 
-        let userExerciseLogs=await getLogsPerDateRange(startDate,endDate)
-       // console.log(userExerciseLogs);
+        return res.json(newResultingUserExerciseLog);
+        
+
 
     }catch(err){
         console.error(err)
@@ -116,5 +118,20 @@ const viewAlluserLogsPerDateRange= async (req, res, next)=>{
     }
 }
 
+const getLogsPerDateRange= async (...data)=>{
+    let userLog= await log.findById({_id: data[0] });
+    let count=0;
+    let userLogRange= userLog.logs.filter((x)=>{
+        let currentDate= new Date(x.date)[Symbol.toPrimitive]('number')
+        if (currentDate> data[1] && currentDate< data[2]){
+            return currentDate
+        }
+        count++;
+        if (count== data[3]){
+            return currentDate
+        }
+    });
+    return userLogRange;
+}
 
-module.exports = { createLog, loggedUser, getExeciseLogCount,viewUserLogs,  viewAlluserLogsPerDateRange, updateUserLogs};
+module.exports = { createLog, loggedUser, getExeciseLogCount,viewUserLogs,  normalOrRangeUserLogs, updateUserLogs};
