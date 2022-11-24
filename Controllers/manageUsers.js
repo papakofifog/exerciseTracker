@@ -18,7 +18,8 @@ const createUser = async (req, res, next)=>{
             //console.log(err.code)
             if (err.code===11000){
                 let currentUser= await getOneUserByName(givenUser)
-                return res.json(currentUser)
+                
+                return res.json(currentUser.introduce())
             }
             return res.json(err)
             

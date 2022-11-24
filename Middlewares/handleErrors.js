@@ -28,13 +28,11 @@ const errorHandler=async (err, req, res, next)=>{
         error = new ErrorResponse(message, 400);
 
     }
-  
-
-     
+    
     res.status(error.statusCode || 500).json({
         success: false,
         error: error.message || 'Server Error'
     })
 }
 
-exports.module= errorHandler;
+module.exports= errorHandler;

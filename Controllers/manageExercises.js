@@ -1,8 +1,6 @@
 //const exercises= require('../module/exercise')rs
 const { getOneUserById }= require('./manageUsers')
-const  { createLog, loggedUser, getExeciseLogCount }= require('./manageLogs')
-const isEmpty = require('../utills/basicFunctions');
-const exercise = require('../module/exercise');
+const  { createLog, loggedUser, getExeciseLogCount,updateUserLogs }= require('./manageLogs')
 
 
 
@@ -28,11 +26,9 @@ const SaveExercise= async (req,res,next)=>{
         }
         // get userlog if it exists or create one.
         let userLog= await loggedUser(userExerciseData);
+        await updateUserLogs(newLogs,userLog)
         
-        userLog.logs.push(newLogs);
-        userLog.count= await getExeciseLogCount(userLog._id)+1
-        await userLog.save();
-        res.json(userLog)
+        res.json(userExerciseData)
         
         
     }catch(err){

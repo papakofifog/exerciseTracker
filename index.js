@@ -3,6 +3,7 @@ const app = express()
 const cors = require('cors')
 const bodyParser= require('body-parser');
 const main=  require('./DB/connecttoDB')
+const errorHandler= require('./Middlewares/handleErrors')
 
 
 app.use(express.json())
@@ -15,12 +16,12 @@ app.use('/api',require('./Middlewares/routes/logRoutes'))
 
 app.use(cors())
 app.use(express.static('./View/public'))
-
-
-
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/View/views/index.html')
 });
+
+// Middleware to handle Errors
+app.use(errorHandler)
 
 
 //connect to db

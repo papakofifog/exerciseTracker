@@ -1,5 +1,7 @@
 const log = require('../module/logs')
 
+
+
 // create user log
 const createLog= async (data)=>{
     try{
@@ -12,8 +14,7 @@ const createLog= async (data)=>{
             return newLog;
         }).catch((err)=>{
             console.error(err)
-        })
-        
+        }) 
     }catch(err){
         console.error(err)
     }
@@ -40,32 +41,49 @@ const loggedUser= async (data) =>{
     }
 }
 
-// check the user log
-let isUserLogged= async (data)=>{
-        
-        if ( data===null){
-            return false;
-        }
-        return true;
+const updateUserLogs= async (newExerciseLog,data)=>{
+    data.logs.push(newExerciseLog);
+    data.count= await getExeciseLogCount(data._id)+1
+    await data.save();
 }
+
+
 
 let getExeciseLogCount= async (user_id)=>{
     let numberExerciseLogs= await log.findById({_id: user_id });
     return numberExerciseLogs.logs.length;
 }
 
-const viewAllLogs= async (req, res)=>{
+
+
+const viewUserLogs= async (req, res, next)=>{
     try{
         let alluserLogs= await log.findById({_id: req.params.id });
-        if(isUserLogged(alluserLogs)){
-            res.json(alluserLogs);
+        //console.log(isUserLogged(alluserLogs))
+        if( isUserLogged(alluserLogs)){
+            
+            return res.json(alluserLogs);
         }
-        req.json("User does not have any logs")
+        //console.log(" Object is null")
+        return res.json("User does not have any logs")
     }catch(err){
         console.error(err)
+        next(err)
     }
     
 }
+
+// check the user log
+let isUserLogged=(data)=>{
+    //console.log(data)    
+    if (data === null){
+        return false;
+    }
+    return true;
+}
+
+
+
 
 
 const getLogsPerDateRange= (startDate,endDate)=>{
@@ -77,24 +95,26 @@ const getLogsPerDateRange= (startDate,endDate)=>{
         }
 
     })
-    
     return userLogRange;
 }
 
-const viewAlluserLogsPerDateRange= async (req, res)=>{
+
+
+const viewAlluserLogsPerDateRange= async (req, res, next)=>{
     try{
         let userId= req.params.id;
         let startDate= req.params.from;
         let endDate= req.params.to;
         let limit= req.params.limit;
 
-        let userExerciseLogs=await viewUserExerciseLogsPerDateRange(startDate,endDate)
-        console.log(userExerciseLogs);
+        let userExerciseLogs=await getLogsPerDateRange(startDate,endDate)
+       // console.log(userExerciseLogs);
 
     }catch(err){
         console.error(err)
+        next(err)
     }
 }
 
 
-module.exports = { createLog, loggedUser, getExeciseLogCount,viewAllLogs,  viewAlluserLogsPerDateRange};
+module.exports = { createLog, loggedUser, getExeciseLogCount,viewUserLogs,  viewAlluserLogsPerDateRange, updateUserLogs};
