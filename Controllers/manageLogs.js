@@ -68,7 +68,7 @@ const viewAllLogs= async (req, res)=>{
 }
 
 
-const viewUserExerciseLogsPerDateRange= (startDate,endDate)=>{
+const getLogsPerDateRange= (startDate,endDate)=>{
     let userLog=log.findById({_id: req.params.id });
     let userLogRange= userLog.logs.filter((x)=>{
         let currentDate= new Date(x.date);
@@ -77,6 +77,7 @@ const viewUserExerciseLogsPerDateRange= (startDate,endDate)=>{
         }
 
     })
+    
     return userLogRange;
 }
 
@@ -91,7 +92,7 @@ const viewAlluserLogsPerDateRange= async (req, res)=>{
         console.log(userExerciseLogs);
 
     }catch(err){
-
+        console.error(err)
     }
 }
 
